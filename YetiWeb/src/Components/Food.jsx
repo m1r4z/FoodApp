@@ -1,9 +1,11 @@
-import { useEffect, useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Card from "react-bootstrap/Card";
-import AddCategory, { Additems } from "./ModalCategory";
 import userLogin from "../context/UserLogin";
 import Delete from "./Delete";
-import CategoryEdit, {ItemEdit} from "./Edit";
+import CategoryEdit, { ItemEdit } from "./Edit";
+import AddCategory, { Additems } from "./ModalCategory";
+
+import { API_BASE_URL } from "../config";
 
 function Food() {
   const [nodata, setnodata] = useState(true);
@@ -22,7 +24,7 @@ function Food() {
   };
 
   useEffect(() => {
-    fetch("https://localhost:7041/api/Category/", Requestoptions)
+    fetch(`${API_BASE_URL}/api/Category/`, Requestoptions)
       .then((response) => response.json())
       .then((data) => {
         setcategorydata(data.result);
@@ -33,7 +35,7 @@ function Food() {
   }, [Categorynewdata]);
 
   useEffect(() => {
-    fetch("https://localhost:7041/api/FoodItem", Requestoptions)
+    fetch(`${API_BASE_URL}/api/FoodItem`, Requestoptions)
       .then((response) => response.json())
       .then((data) => {
         setitemdata(data.result);

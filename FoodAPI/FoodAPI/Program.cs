@@ -93,6 +93,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseCors("reactApp");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -100,15 +102,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("reactApp");
-
+SeedDatabase();
 app.Run();
 
 void SeedDatabase()

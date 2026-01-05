@@ -1,7 +1,8 @@
+import { useContext, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
-import { useState, useContext } from "react";
+import { API_BASE_URL } from "../config";
 import userLogin from "../context/UserLogin";
 
 function AddCategory() {
@@ -28,7 +29,7 @@ function AddCategory() {
       body: JSON.stringify(data),
     };
     const Fetch = await fetch(
-      "https://localhost:7041/api/Category",
+      `${API_BASE_URL}/api/Category`,
       Requestoptions
     );
     const jasonData = await Fetch.json();
@@ -114,7 +115,7 @@ export function Additems(props) {
       body: formData,
     };
     const Fetch = await fetch(
-      "https://localhost:7041/api/FoodItem",
+      `${API_BASE_URL}/api/FoodItem`,
       Requestoptions
     );
     const jasonData = await Fetch.json();

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import userLogin from "../context/UserLogin";
-import { Navigate,useLocation,useNavigate } from "react-router-dom";
-
 
 function NewSeller() {
   const { loggedin, LoginToken, setUserProfiledata } =
@@ -25,24 +25,24 @@ function NewSeller() {
   }
 
   async function sellerInfo() {
-    const data = {
-      name: RestaurantName.trim().toLocaleLowerCase(),
-      address: RestaurantAddress.trim().toLocaleLowerCase(),
-      
-    };
-    const Requestoptions = {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-         "Authorization": "Bearer " + LoginToken,
-      },
-      body: JSON.stringify(data),
-    };
-    const Fetch = await fetch(
-      "https://localhost:7041/api/SellerProfile",
-      Requestoptions
-    );
+  const data = {
+    name: RestaurantName.trim().toLocaleLowerCase(),
+    address: RestaurantAddress.trim().toLocaleLowerCase(),
+    
+  };
+  const Requestoptions = {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+       "Authorization": "Bearer " + LoginToken,
+    },
+    body: JSON.stringify(data),
+  };
+  const Fetch = await fetch(
+    `${API_BASE_URL}/api/SellerProfile`,
+    Requestoptions
+  );
     const jasonData = await Fetch.json();
     if(jasonData.isSuccess==true){
       

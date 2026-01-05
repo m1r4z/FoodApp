@@ -3,6 +3,8 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import userLogin from "../context/UserLogin";
 
+import { API_BASE_URL } from "../config";
+
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -37,7 +39,7 @@ function Login() {
     };
 
     const Fetch = await fetch(
-      "https://localhost:7041/api/User/login",
+      `${API_BASE_URL}/api/User/login`,
       Requestoptions
     );
 

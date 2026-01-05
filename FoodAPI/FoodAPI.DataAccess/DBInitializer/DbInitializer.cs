@@ -37,32 +37,36 @@ namespace FoodAPI.DataAccess.DBInitializer
 
             }
 
-            //create role if they are not created
-            if (_roleManager.FindByNameAsync(SD.RoleAdmin).GetAwaiter()
-                    .GetResult() is null)
+            // Check if admin user already exists
+            if (_userManager.FindByEmailAsync("admin@gmail.com").GetAwaiter().GetResult() != null)
             {
-                _roleManager.CreateAsync(new IdentityRole(){Name = SD.RoleCustomer})
-                    .GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole() {Name = SD.RoleDeliveryRider })
-                    .GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole() { Name = SD.RoleIndividualSeller })
-                    .GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole() { Name = SD.RoleRestaurantSeller })
-                    .GetAwaiter().GetResult();
+                return;
+            }
 
-                //if role are not created, then we will create admin user as well
-                _userManager.CreateAsync(new ApplicationUser
+            // Create roles if they don't exist
+            string[] roles = { SD.RoleAdmin, SD.RoleCustomer, SD.RoleDeliveryRider, SD.RoleIndividualSeller, SD.RoleRestaurantSeller };
+            foreach (var role in roles)
+            {
+                if (!_roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                 {
-                   FullName = "Admin",
-                   PhoneNumber = "1234567890",
-                   Email = "admin@gmail.com",
-                   PasswordHash = "Admin123!",
-                   UserName = "admin@gmail.com",
-                   Address = "adminAddress"
-                }, "Admin123!").GetAwaiter().GetResult();
+                    _roleManager.CreateAsync(new IdentityRole { Name = role }).GetAwaiter().GetResult();
+                }
+            }
 
-                var user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
-                _userManager.AddToRoleAsync(user, SD.RoleAdmin).GetAwaiter().GetResult();
+            // Create admin user
+            var adminUser = new ApplicationUser
+            {
+                FullName = "Admin",
+                PhoneNumber = "1234567890",
+                Email = "admin@gmail.com",
+                UserName = "admin@gmail.com",
+                Address = "adminAddress"
+            };
+
+            var result = _userManager.CreateAsync(adminUser, "Admin123!").GetAwaiter().GetResult();
+            if (result.Succeeded)
+            {
+                _userManager.AddToRoleAsync(adminUser, SD.RoleAdmin).GetAwaiter().GetResult();
             }
 
             return;
