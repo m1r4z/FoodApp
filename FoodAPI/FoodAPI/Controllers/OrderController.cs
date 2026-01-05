@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using FoodAPI.Models.Models.Dto;
 using Microsoft.AspNetCore.Identity;
-using Stripe.Checkout;
-using Stripe;
+// using Stripe.Checkout;
+// using Stripe;
 
 namespace FoodAPI.Controllers
 {
@@ -83,6 +83,7 @@ namespace FoodAPI.Controllers
                     await _dbOrderDetail.CreateAsync(orderDetail);
                 }
                 // Capture Payment
+                /*
                 var options = new PaymentIntentCreateOptions
                 {
                     Amount = (long?)(orderHeader.OrderTotal*100),
@@ -95,12 +96,16 @@ namespace FoodAPI.Controllers
                 var service1 = new PaymentIntentService();
                 var paymentIntent = await service1.CreateAsync(options);
                 await _dbOrderHeader.UpdateStripePaymentIDAsync(orderHeader.Id, "sessionId", paymentIntent.ClientSecret);
+                */
 
+                // Bypass Stripe: Return dummy data
+                string dummyClientSecret = "pi_dummy_secret_" + Guid.NewGuid().ToString();
+                await _dbOrderHeader.UpdateStripePaymentIDAsync(orderHeader.Id, "dummy_session", dummyClientSecret);
 
                 //_response.Result = paymentIntent.ClientSecret;
                 _response.Result = new
                 {
-                    paymentIntentId = paymentIntent.ClientSecret,
+                    paymentIntentId = dummyClientSecret,
                     orderHeaderId = orderHeader.Id,
                 };
                 _response.IsSuccess = true;

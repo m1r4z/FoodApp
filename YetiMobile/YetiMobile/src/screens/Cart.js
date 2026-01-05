@@ -1,27 +1,24 @@
+import { useNavigation } from "@react-navigation/native";
+// import { useStripe } from "@stripe/stripe-react-native";
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import {
-  View,
+  Alert,
+  FlatList,
+  Image,
   Text,
   TouchableOpacity,
-  Image,
-  FlatList,
-  Alert,
+  View,
 } from "react-native";
-import { React, useState, useContext, useEffect } from "react";
-import LottieView from "lottie-react-native";
-import { useNavigation } from "@react-navigation/native";
-import { cart } from "../../Database/CartItems";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
 import { BaseUrl } from "../../Database/BaseUrl";
-import { useStripe } from "@stripe/stripe-react-native";
+import { AuthContext } from "../context/AuthContext";
 
 const Cart = (item) => {
   const navigation = useNavigation();
   const { authData } = useContext(AuthContext);
   const [cart, setCart] = useState([]);
   const [fetchError, setFetchError] = useState(null);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -82,6 +79,7 @@ const Cart = (item) => {
       return;
     }
     // 2. Initilizethe Payment sheet
+    /*
     const initResponse = await initPaymentSheet({
       merchantDisplayName: "YetaiFood.dev",
       paymentIntentClientSecret: response.result.paymentIntentId,
@@ -95,15 +93,18 @@ const Cart = (item) => {
       Alert.alert("Something went wrong!!!");
       return;
     }
+    */
     // 3. Present Payment Sheet from Strip
-    await presentPaymentSheet();
+    // await presentPaymentSheet();
+
     // 4. If Payment ok -> clear the cart
+    // Bypass Stripe: Directly confirm the order
     const clearCartResponse = await OrderConfirmation(orderHeaderId);
     if (clearCartResponse.isSuccess) {
-      Alert.alert("success", "Order has been Placed");
+      Alert.alert("success", "Order has been Placed (Payment Bypassed)");
       setCart([]);
     } else {
-      Alert.alert("error", "Something went wrong");
+      Alert.alert("error", "Something went wrong during order confirmation");
     }
   };
 
