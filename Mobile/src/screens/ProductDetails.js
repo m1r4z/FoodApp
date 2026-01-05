@@ -1,10 +1,9 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
-import {StarIcon,BackspaceIcon} from 'react-native-heroicons/solid'
-import {ClockIcon,PlusCircleIcon,MinusCircleIcon,} from 'react-native-heroicons/outline'
 import { useNavigation } from '@react-navigation/native';
-import MoreItems from '../components/MoreItems';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { ClockIcon } from 'react-native-heroicons/outline';
+import { BackspaceIcon, StarIcon } from 'react-native-heroicons/solid';
 import { cart } from '../../Database/CartItems';
+import MoreItems from '../components/MoreItems';
 
 
 const ProductDetails = ({route}) => {

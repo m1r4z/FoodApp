@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  ActivityIndicator,
   FlatList,
   Image,
-  ActivityIndicator,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { BaseUrl } from "../../Database/BaseUrl";
-import axios from "axios";
 
 const RenderAllProducts = ({ item }) => {
   const navigation = useNavigation();
@@ -47,7 +47,7 @@ const RenderAllProducts = ({ item }) => {
   );
 };
 
-const HouseholdProduct = () => {
+const ListOfRestaurant = () => {
   const [sellerProfiles, setSellerProfiles] = useState([]);
   const [filteredSellerProfiles, setFilteredSellerProfiles] = useState([]);
   const [fetchError, setFetchError] = useState(null);
@@ -137,4 +137,4 @@ const HouseholdProduct = () => {
   );
 };
 
-export default HouseholdProduct;
+export default ListOfRestaurant;

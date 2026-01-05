@@ -191,11 +191,19 @@ namespace FoodAPI.Controllers
         }
 
         [HttpGet("GetAllFoodItem")]
-        public async Task<ActionResult<APIResponse>> GetAllFoodItem(int id)
+        public async Task<ActionResult<APIResponse>> GetAllFoodItem(int? id = null)
         {
             try
             {
-                var foodItem = await _dbFoodItem.GetAllAsync(u => u.SellerProfileId == id);
+                List<FoodItem> foodItem;
+                if (id == null || id == 0)
+                {
+                    foodItem = await _dbFoodItem.GetAllAsync(includeProperties: "SellerProfile,Category");
+                }
+                else
+                {
+                    foodItem = await _dbFoodItem.GetAllAsync(u => u.SellerProfileId == id, includeProperties: "SellerProfile,Category");
+                }
 
                 _response.Result = _mapper.Map<List<FoodItemDTO>>(foodItem);
                 _response.StatusCode = HttpStatusCode.OK;
