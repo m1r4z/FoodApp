@@ -1,11 +1,20 @@
-import "./ComponentCSS/Profile.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import userLogin from "../context/UserLogin";
+import "./ComponentCSS/Profile.css";
 
 function Userprofile() {
   const { Userdata, LoginToken, UserProfiledata } = useContext(userLogin);
   const [edit, setedit] = useState(false);
   const [editRes, seteditRes] = useState(false);
+
+  if (!Userdata || !UserProfiledata) {
+    return (
+      <div className="container mt-5 text-center">
+        <h3>Loading profile...</h3>
+      </div>
+    );
+  }
+
 
   return (
     <>
@@ -24,7 +33,7 @@ function Userprofile() {
                     />
                     <div className="mt-3">
                       <h4 style={{ textTransform: "capitalize" }}>
-                        {Userdata.fullName}
+                        {Userdata?.fullName}
                       </h4>
                       <p className="text-secondary mb-1"></p>
                     </div>
@@ -54,7 +63,7 @@ function Userprofile() {
                       Website
                     </h6>
                     <span className="text-secondary">
-                      https://{UserProfiledata.name.split(" ").join("")}.com
+                      https://{UserProfiledata?.name?.split(" ").join("")}.com
                     </span>
                   </li>
                   <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
@@ -76,7 +85,7 @@ function Userprofile() {
                       Twitter
                     </h6>
                     <span className="text-secondary">
-                      @{UserProfiledata.name.split(" ").join("")}
+                      @{UserProfiledata?.name?.split(" ").join("")}
                     </span>
                   </li>
                   <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
@@ -108,7 +117,7 @@ function Userprofile() {
                     </h6>
                     <span className="text-secondary">
                       {" "}
-                      @{UserProfiledata.name.split(" ").join("")}
+                      @{UserProfiledata?.name?.split(" ").join("")}
                     </span>
                   </li>
                   <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
@@ -131,7 +140,7 @@ function Userprofile() {
                     </h6>
                     <span className="text-secondary">
                       {" "}
-                      @{UserProfiledata.name.split(" ").join("")}
+                      @{UserProfiledata?.name?.split(" ").join("")}
                     </span>
                   </li>
                 </ul>
@@ -149,7 +158,7 @@ function Userprofile() {
                         className="col-sm-9 text-secondary"
                         style={{ textTransform: "capitalize" }}
                       >
-                        {Userdata.fullName}
+                        {Userdata?.fullName}
                       </div>
                     </div>
                     <hr />
@@ -158,7 +167,7 @@ function Userprofile() {
                         <h6 className="mb-0">Email</h6>
                       </div>
                       <div className="col-sm-9 text-secondary">
-                        {Userdata.email}
+                        {Userdata?.email}
                       </div>
                     </div>
                     <hr />
@@ -167,7 +176,7 @@ function Userprofile() {
                         <h6 className="mb-0">Phone</h6>
                       </div>
                       <div className="col-sm-9 text-secondary">
-                        {Userdata.phoneNumber}
+                        {Userdata?.phoneNumber}
                       </div>
                     </div>
                     <hr />
@@ -179,7 +188,7 @@ function Userprofile() {
                         className="col-sm-9 text-secondary"
                         style={{ textTransform: "capitalize" }}
                       >
-                        {Userdata.address}
+                        {Userdata?.address}
                       </div>
                     </div>
                     <hr />
@@ -209,7 +218,7 @@ function Userprofile() {
                         <input
                           type="text"
                           class="form-control"
-                          value={Userdata.fullName}
+                          value={Userdata?.fullName}
                         ></input>
                       </div>
                     </div>
@@ -222,7 +231,7 @@ function Userprofile() {
                         <input
                           type="email"
                           class="form-control"
-                          value={Userdata.email}
+                          value={Userdata?.email}
                         ></input>
                       </div>
                     </div>
@@ -235,7 +244,7 @@ function Userprofile() {
                         <input
                           type="number"
                           class="form-control"
-                          value={Userdata.phoneNumber}
+                          value={Userdata?.phoneNumber}
                         ></input>
                       </div>
                     </div>
@@ -251,7 +260,7 @@ function Userprofile() {
                         <input
                           type="text"
                           class="form-control"
-                          value={Userdata.address}
+                          value={Userdata?.address}
                         ></input>
                       </div>
                     </div>
@@ -284,7 +293,7 @@ function Userprofile() {
                         className="col-sm-9 text-secondary"
                         style={{ textTransform: "capitalize" }}
                       >
-                        {UserProfiledata.name}
+                        {UserProfiledata?.name}
                       </div>
                     </div>
                     <hr />
@@ -296,7 +305,7 @@ function Userprofile() {
                         className="col-sm-9 text-secondary"
                         style={{ textTransform: "capitalize" }}
                       >
-                        {UserProfiledata.address}
+                        {UserProfiledata?.address}
                       </div>
                     </div>
                     <hr />
@@ -329,7 +338,7 @@ function Userprofile() {
                         <input
                           type="text"
                           class="form-control"
-                          value={UserProfiledata.name}
+                          value={UserProfiledata?.name}
                         ></input>
                       </div>
                     </div>
@@ -345,7 +354,7 @@ function Userprofile() {
                         <input
                           type="text"
                           class="form-control"
-                          value={UserProfiledata.address}
+                          value={UserProfiledata?.address}
                         ></input>
                       </div>
                     </div>

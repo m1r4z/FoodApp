@@ -1,10 +1,10 @@
-import "./ComponentCSS/Nvigation.css";
 import { useContext, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import userLogin from "../context/UserLogin";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import "./ComponentCSS/Nvigation.css";
+import Food from "./Food";
 import Order from "./Order";
 import Userprofile from "./Userprofile";
-import Food from "./Food";
 
 
 function Navbar() {
@@ -102,9 +102,13 @@ function Navbar() {
           </div>
         </aside>
         <div className="main p-3">
-           {order && <Order></Order>}
-           {profile && <Userprofile></Userprofile>}
-           {menu && <Food></Food>}
+          {loggedin && (
+            <>
+              {order && <Order></Order>}
+              {profile && <Userprofile></Userprofile>}
+              {menu && <Food></Food>}
+            </>
+          )}
         </div>
       </div>
     </>
