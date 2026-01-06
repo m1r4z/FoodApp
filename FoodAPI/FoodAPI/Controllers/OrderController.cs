@@ -179,11 +179,98 @@ namespace FoodAPI.Controllers
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved);
+                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
 
                 if (orderHeader == null)
                 {
                     _response.Result = "No pending Order";
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    return Ok(_response);
+                }
+                _response.Result = _mapper.Map<List<OrderHeaderDTO>>(orderHeader);
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpGet("PickOrder")]
+        [Authorize(Roles = SD.RoleDeliveryRider)]
+        public async Task<ActionResult<APIResponse>> PickOrder(int id)
+        {
+            try
+            {
+                var orderHeader = await _dbOrderHeader.GetAsync(u => u.Id == id);
+                if (orderHeader == null)
+                {
+                    _response.Result = "Order not found";
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    return Ok(_response);
+                }
+                orderHeader.OrderStatus = SD.OrderStatusPicked;
+                await _dbOrderHeader.UpdateAsync(orderHeader);
+
+                _response.Result = "Order status updated to Picked";
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpGet("GetPickedOrders")]
+        [Authorize(Roles = SD.RoleDeliveryRider)]
+        public async Task<ActionResult<APIResponse>> GetPickedOrders()
+        {
+            try
+            {
+                var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
+                    u.OrderStatus == SD.OrderStatusPicked && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+
+                if (orderHeader == null)
+                {
+                    _response.Result = "No picked orders";
+                    _response.StatusCode = HttpStatusCode.OK;
+                    _response.IsSuccess = true;
+                    return Ok(_response);
+                }
+                _response.Result = _mapper.Map<List<OrderHeaderDTO>>(orderHeader);
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpGet("GetShippedOrders")]
+        [Authorize(Roles = SD.RoleDeliveryRider)]
+        public async Task<ActionResult<APIResponse>> GetShippedOrders()
+        {
+            try
+            {
+                var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
+                    u.OrderStatus == SD.OrderStatusShipped && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+
+                if (orderHeader == null)
+                {
+                    _response.Result = "No shipped orders";
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.IsSuccess = true;
                     return Ok(_response);

@@ -1,181 +1,206 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  Alert,
-  TextInput,
-} from "react-native";
-import React, { useState, useEffect, useContext } from "react";
-import {
-  StarIcon,
-  BackspaceIcon,
-  PlusIcon,
-  ShoppingCartIcon,
-} from "react-native-heroicons/solid";
-import {
-  ClockIcon,
-  PlusCircleIcon,
-  MinusCircleIcon,
-} from "react-native-heroicons/outline";
-import { useNavigation } from "@react-navigation/native";
-import MoreItems from "../components/MoreItems";
-import { cart } from "../../Database/CartItems";
-import { BaseUrl } from "../../Database/BaseUrl";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import { useCallback, useContext, useState } from "react";
+import {
+    FlatList,
+    Image,
+    RefreshControl,
+    SafeAreaView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { MapPinIcon } from "react-native-heroicons/outline";
+import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
 
 const DeliveryHome = ({ route }) => {
   const { id } = route.params || {};
   const [order, setOrder] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState("Pending"); // Pending | Picked | Shipped
   const { authData } = useContext(AuthContext);
   const navigation = useNavigation();
 
-  //   useEffect(() => {
-  //     const fetchorder = async () => {
-  //       try {
-  //         const response = await axios.get(`${BaseUrl}Order/GetPendingOrder`);
-  //         console.log("Response data:", response.data);
-
-  //         if (response.data.isSuccess) {
-  //           setOrder(response.data.result);
-  //           setFetchError(null);
-  //         } else {
-  //           setFetchError(
-  //             "Error fetching food item: " + response.data.errorMessage
-  //           );
-  //         }
-  //       } catch (error) {
-  //         setFetchError("Error fetching food item: " + error.message);
-  //       }
-  //     };
-  //     fetchorder();
-  //   }, []);
-
   const fetchOrder = async () => {
+    let endpoint = "";
+    if (activeTab === "Pending") endpoint = "Order/GetPendingOrder";
+    else if (activeTab === "Picked") endpoint = "Order/GetPickedOrders";
+    else if (activeTab === "Shipped") endpoint = "Order/GetShippedOrders";
+
     try {
-      const response = await axios.get(`${BaseUrl}Order/GetPendingOrder`, {
+      const response = await axios.get(`${BaseUrl}${endpoint}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      console.log("Response data:", response.data);
+      console.log(`Response data (${activeTab}):`, response.data);
 
       if (response.data.isSuccess) {
         setOrder(response.data.result);
         setFetchError(null);
       } else {
-        setFetchError(
-          "Error fetching food item: " + response.data.errorMessage
-        );
+        // If API returns "No pending Order" etc as result string, handle it
+        if (typeof response.data.result === 'string') {
+             setOrder([]);
+        } else {
+             setFetchError(response.data.errorMessage || "No orders found");
+        }
       }
     } catch (error) {
-      setFetchError("Error fetching food item: " + error.message);
+      setOrder([]);
+      setFetchError("Error fetching orders: " + error.message);
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      fetchOrder();
-    });
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchOrder();
+    setRefreshing(false);
+  }, [activeTab]);
 
-    return unsubscribe;
-  }, [navigation]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrder();
+    }, [activeTab])
+  );
 
   const addTocart = async (id) => {
-    const cart = {
-      orderId: id,
-      Count: 1,
-    };
-    console.log(cart);
-    console.log(authData.token);
-
-    try {
-      const response = await axios.post(`${BaseUrl}ShoppingCart`, cart, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.token}`,
-        },
-      });
-      console.log(response.data);
-      if (response.data.isSuccess === true) {
-        Alert.alert("Success", "Food added to cart.");
-      } else {
-        Alert.alert("Error", "Something went wrong. Try Again!!!");
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
+      // ... existing implementation if needed
   };
 
   const handleDeliveryPress = (item) => {
-    navigation.navigate("OrderConfirmation", { item, fetchOrder });
+    navigation.navigate("OrderConfirmation", { item, fetchOrder, activeTab });
   };
 
-  return (
-    <View className="flex-1 absolute w-full h-full">
-      <View className="w-11/12 mx-auto rounded-xl py-4 px-2 mt-4">
-        <Text className="w-full p-3 text-center font-semibold text-xl">
-          Pending Orders
-        </Text>
-      </View>
+  const TabButton = ({ title, isActive, onPress }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      className={`px-4 py-2 rounded-full mr-2 ${
+        isActive ? "bg-orange-500" : "bg-gray-200"
+      }`}
+    >
+      <Text
+        className={`font-semibold ${
+          isActive ? "text-white" : "text-gray-600"
+        }`}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
 
-      {fetchError ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ color: "red" }}>{fetchError}</Text>
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
+      <View className="flex-1 px-4">
+        <View className="py-4 mt-2">
+          <Text className="text-2xl font-bold text-gray-800">
+            Delivery Jobs
+          </Text>
+          <Text className="text-gray-500 text-sm mt-1">
+            Manage your deliveries
+          </Text>
         </View>
-      ) : (
-        <FlatList
-          className=""
-          data={order}
-          keyExtractor={(item) => item.applicationUserId.toString()}
-          renderItem={({ item }) => (
-            <RenderAllorder
-              item={item}
-              addTocart={addTocart}
-              handleDeliveryPress={handleDeliveryPress}
+
+        {/* Tabs */}
+        <View className="flex-row mb-4">
+            <TabButton 
+                title="Pending" 
+                isActive={activeTab === "Pending"} 
+                onPress={() => setActiveTab("Pending")} 
             />
-          )}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        />
-      )}
+            <TabButton 
+                title="Picked" 
+                isActive={activeTab === "Picked"} 
+                onPress={() => setActiveTab("Picked")} 
+            />
+            <TabButton 
+                title="Shipped" 
+                isActive={activeTab === "Shipped"} 
+                onPress={() => setActiveTab("Shipped")} 
+            />
+        </View>
+
+        {order.length === 0 ? (
+          <View className="flex-1 justify-center items-center">
+             <Text className="text-gray-400 text-lg">No {activeTab.toLowerCase()} orders</Text>
+             <TouchableOpacity onPress={onRefresh} className="mt-4">
+                <Text className="text-orange-500">Tap to refresh</Text>
+             </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            className="mt-2"
+            data={order}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#f97316"]} />
+            }
+            renderItem={({ item }) => (
+              <RenderAllorder
+                item={item}
+                handleDeliveryPress={handleDeliveryPress}
+                status={activeTab}
+              />
+            )}
+            ItemSeparatorComponent={() => <View className="h-4" />}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const RenderAllorder = ({ item, handleDeliveryPress, status }) => {
+  return (
+    <View className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex-row">
+      <Image
+        className="rounded-xl bg-gray-200"
+        source={require("../../assets/images/friedchicken.jpg")}
+        style={{ height: 110, width: 110 }}
+        resizeMode="cover"
+      />
+      
+      <View className="flex-1 ml-4 justify-between py-1">
+        <View>
+          <View className="flex-row items-start space-x-1">
+            <MapPinIcon size={16} color="#6b7280" style={{marginTop: 3}} />
+            <Text className="text-gray-800 font-bold text-base flex-1" numberOfLines={2}>
+              {item.address}
+            </Text>
+          </View>
+
+          {/* Food Items Summary */}
+          <View className="mt-2">
+            <Text className="text-gray-500 text-sm" numberOfLines={2}>
+              {item.orderDetails && item.orderDetails.length > 0 
+                ? item.orderDetails.map(detail => `${detail.foodItem.foodName} x${detail.count}`).join(', ')
+                : "No items"}
+            </Text>
+          </View>
+          
+          <Text className="text-orange-500 font-bold text-lg mt-2">
+            Rs. {item.orderTotal}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          className="bg-orange-500 py-2.5 px-4 rounded-xl flex-row justify-center items-center shadow-sm"
+          onPress={() => handleDeliveryPress(item)}
+          activeOpacity={0.8}
+        >
+          <Text className="text-white font-bold text-sm tracking-wide">
+            {status === "Shipped" ? "View Details" : "Process Order"} 
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
-const RenderAllorder = ({ item, index, handleDeliveryPress }) => {
-  return (
-    <View className="flex-row items-center bg-blue-200 rounded-3xl w-11/12 mx-auto">
-      <View className="mr-4">
-        <Image
-          className="rounded-l-3xl"
-          source={require("../../assets/images/friedchicken.jpg")} // Assuming you have an 'image' property in the seller profile
-          style={{ height: 120, width: 130 }}
-        />
-      </View>
-      <View className="gap-y-2">
-        <View>
-          <Text className="text-xl font-bold">{item.address}</Text>
-        </View>
-        <View className="flex-row justify-between w-56 items-center ">
-          <View>
-            <Text>Rs. {item.orderTotal}</Text>
-          </View>
-          <View>
-            <TouchableOpacity
-              className="p-2 bg-green-400 rounded-xl"
-              onPress={() => handleDeliveryPress(item)}
-            >
-              <Text>Delivered</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-};
 export default DeliveryHome;
