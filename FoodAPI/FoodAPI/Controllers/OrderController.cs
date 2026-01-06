@@ -336,7 +336,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.ApplicationUserId == userId);
+                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.ApplicationUserId == userId, includeProperties: "OrderDetails,OrderDetails.FoodItem");
                 
                 // Optional: Order by date descending if not done in repository
                  orderHeaders = orderHeaders.OrderByDescending(u => u.OrderDate).ToList();

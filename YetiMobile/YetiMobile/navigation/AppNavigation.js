@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import BusinessSignUp from "../src/screens/BusinessSignUp";
 import BuyerSignUp from "../src/screens/BuyerSignUp";
 import Cart from "../src/screens/Cart";
+import CustomerOrderDetails from "../src/screens/CustomerOrderDetails";
 import DeliveryHome from "../src/screens/DeliveryHome";
 import DeliveryRiderSighup from "../src/screens/DeliveryRiderSighup";
 import IndividualSignUp from "../src/screens/IndividualSignUp";
@@ -43,6 +44,7 @@ const AppNavigation = () => {
         <Stack.Screen name="LogIn" component={LogIn} />
         <Stack.Screen name="DeliveryHome" component={DeliveryHome} />
         <Stack.Screen name="OrderConfirmation" component={OrderConfirmation} />
+        <Stack.Screen name="CustomerOrderDetails" component={CustomerOrderDetails} />
         <Stack.Screen name="OrderHistory" component={OrderHistory} />
       </Stack.Navigator>
     </NavigationContainer>

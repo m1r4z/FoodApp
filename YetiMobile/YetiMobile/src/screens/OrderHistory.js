@@ -58,7 +58,9 @@ const OrderHistory = () => {
         return "text-yellow-600 bg-yellow-100";
       case "approved":
         return "text-blue-600 bg-blue-100";
-        case "shipped": 
+      case "picked":
+        return "text-indigo-600 bg-indigo-100";
+      case "shipped": 
         return "text-purple-600 bg-purple-100";
       case "completed":
         return "text-green-600 bg-green-100";
@@ -70,7 +72,10 @@ const OrderHistory = () => {
   };
 
   const renderItem = ({ item }) => (
-    <View className="mx-4 mb-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+    <TouchableOpacity 
+      onPress={() => navigation.navigate("CustomerOrderDetails", { item })}
+      className="mx-4 mb-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+    >
       <View className="flex-row justify-between items-center mb-2">
         <Text className="text-gray-500 font-medium">
           Order #{item.id}
@@ -95,7 +100,7 @@ const OrderHistory = () => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
