@@ -67,6 +67,27 @@ namespace FoodAPI.Controllers
 
                 cartAddDto.ApplicationUserId = userId;
 
+                
+                // Check if user has items in cart
+                var cartItems = await _dbCart.GetAllAsync(u => u.ApplicationUserId == userId, includeProperties: "FoodItem");
+                if (cartItems != null && cartItems.Count > 0)
+                {
+                    // Existing cart - check seller
+                    var existingItem = cartItems.FirstOrDefault(); // Since mixed seller is not allowed, any item is fine
+                    if (existingItem != null && existingItem.FoodItem != null) 
+                    {
+                          var newItemSellerId = (await _dbFoodItem.GetAsync(u => u.Id == cartAddDto.FoodItemId)).SellerProfileId;
+                          if (existingItem.FoodItem.SellerProfileId != newItemSellerId) 
+                          {
+                                _response.Result = "Cart contains items from another seller. Please clear cart first.";
+                                _response.StatusCode = HttpStatusCode.Conflict;
+                                _response.IsSuccess = false;
+                                return Conflict(_response);
+                          }
+                    }
+
+                }
+
                 ShoppingCart foodItemExist = await _dbCart.GetAsync(u =>
                     u.ApplicationUserId == userId && u.FoodItemId == cartAddDto.FoodItemId);
                 if (foodItemExist != null)
@@ -213,6 +234,31 @@ namespace FoodAPI.Controllers
                 await _dbCart.RemoveAsync(cart);
 
                 _response.Result = "Cart Removed";
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpDelete("ClearCart")]
+        [Authorize(Roles = SD.RoleCustomer)]
+        public async Task<ActionResult<APIResponse>> ClearCart()
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+                var shoppingCart = await _dbCart.GetAllAsync(u => u.ApplicationUserId == userId);
+                if (shoppingCart != null && shoppingCart.Count > 0)
+                {
+                    await _dbCart.RemoveRangeAsync(shoppingCart);
+                }
+                    
+                _response.Result = "Cart Cleared";
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);

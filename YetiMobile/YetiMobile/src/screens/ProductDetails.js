@@ -2,26 +2,26 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Image,
-    SafeAreaView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import {
-    ClockIcon,
-    MapPinIcon,
+  ClockIcon,
+  MapPinIcon,
 } from "react-native-heroicons/outline";
 import {
-    ChevronLeftIcon,
-    MagnifyingGlassIcon,
-    PlusIcon,
-    ShoppingCartIcon,
-    StarIcon,
+  ChevronLeftIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  ShoppingCartIcon,
+  StarIcon,
 } from "react-native-heroicons/solid";
 import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
@@ -60,28 +60,59 @@ const ProductDetails = ({ route }) => {
     }
   }, [id]);
 
+  // Helper function to actually add the item after clearing or directly
+  const performAddToCart = async (cartItem) => {
+      try {
+          const response = await axios.post(`${BaseUrl}ShoppingCart`, cartItem, {
+              headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${authData.token}`,
+              },
+          });
+          if (response.data.isSuccess) {
+              Alert.alert("Success", "Added to your cart!");
+          } else {
+              Alert.alert("Error", "Failed to add to cart.");
+          }
+      } catch (error) {
+          if (error.response && error.response.status === 409) {
+             // Conflict - Mixed Seller
+             Alert.alert(
+                 "Clear Cart?",
+                 "Your cart contains items from another restaurant. Do you want to clear your cart and add this item?",
+                 [
+                     { text: "Cancel", style: "cancel" },
+                     { 
+                         text: "Yes, Clear Cart", 
+                         onPress: async () => {
+                             try {
+                                 // Call Clear Cart API
+                                 await axios.delete(`${BaseUrl}ShoppingCart/ClearCart`, {
+                                    headers: { Authorization: `Bearer ${authData.token}` }
+                                 });
+                                 // Retry Adding Item
+                                 await performAddToCart(cartItem);
+                             } catch (clearError) {
+                                 console.error("Error clearing cart:", clearError);
+                                 Alert.alert("Error", "Failed to clear cart.");
+                             }
+                         }
+                     }
+                 ]
+             );
+          } else {
+              console.error("Error adding to cart:", error);
+              Alert.alert("Error", "Something went wrong.");
+          }
+      }
+  };
+
   const addTocart = async (foodId) => {
     const cartItem = {
       FoodItemId: foodId,
       Count: 1,
     };
-
-    try {
-      const response = await axios.post(`${BaseUrl}ShoppingCart`, cartItem, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authData.token}`,
-        },
-      });
-      if (response.data.isSuccess) {
-        Alert.alert("Success", "Added to your cart!");
-      } else {
-        Alert.alert("Error", "Failed to add to cart.");
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      Alert.alert("Error", "Something went wrong.");
-    }
+    await performAddToCart(cartItem);
   };
 
   const searchFoodItems = (text) => {

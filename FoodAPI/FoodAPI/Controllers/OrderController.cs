@@ -24,10 +24,11 @@ namespace FoodAPI.Controllers
         private readonly IOrderDetailRepository _dbOrderDetail;
         private readonly IShoppingCartRepository _dbCart;
         private readonly IFoodItemRepository _dbFoodItem;
+        private readonly ISellerProfileRepository _dbSellerProfile;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
-        public OrderController(IOrderHeaderRepository dbOrderHeader, IOrderDetailRepository dbOrderDetail,  IMapper mapper, IShoppingCartRepository dbCart, IFoodItemRepository dbFoodItem, UserManager<ApplicationUser> userManager)
+        public OrderController(IOrderHeaderRepository dbOrderHeader, IOrderDetailRepository dbOrderDetail,  IMapper mapper, IShoppingCartRepository dbCart, IFoodItemRepository dbFoodItem, ISellerProfileRepository dbSellerProfile, UserManager<ApplicationUser> userManager)
         {
             _dbOrderHeader = dbOrderHeader;
             _dbOrderDetail = dbOrderDetail;
@@ -35,6 +36,7 @@ namespace FoodAPI.Controllers
             this._response = new();
             _dbCart = dbCart;
             _dbFoodItem = dbFoodItem;
+            _dbSellerProfile = dbSellerProfile;
             _userManager = userManager;
         }
 
@@ -321,13 +323,55 @@ namespace FoodAPI.Controllers
         [Authorize(Roles = $"{SD.RoleRestaurantSeller}, {SD.RoleIndividualSeller}")]
         public async Task<ActionResult<APIResponse>> GetAllOrder()
         {
-            var orderHeader = await _dbOrderHeader.GetAllAsync(u=>u.OrderStatus==SD.OrderStatusApproved && u.PaymentStatus==SD.PaymentStatusApproved);
+            try
+            {
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+                var sellerProfile = await _dbSellerProfile.GetAsync(u => u.ApplicationUserId == userId);
 
-            _response.Result = _mapper.Map<List<OrderHeaderDTO>>(orderHeader);
-            _response.StatusCode = HttpStatusCode.OK;
-            _response.IsSuccess = true;
-            return Ok(_response);
+                if (sellerProfile == null)
+                {
+                     _response.Result = "Seller profile not found found";
+                     _response.StatusCode = HttpStatusCode.NotFound;
+                     _response.IsSuccess = false;
+                     return NotFound(_response);
+                }
+
+                // Get all approved ordered with details
+                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                
+                var filteredOrders = new List<OrderHeaderDTO>();
+
+                foreach(var order in orderHeaders)
+                {
+                    // Filter details for this seller
+                    var sellerDetails = order.OrderDetails.Where(d => d.FoodItem != null && d.FoodItem.SellerProfileId == sellerProfile.Id).ToList();
+
+                    if (sellerDetails.Any())
+                    {
+                        var orderDto = _mapper.Map<OrderHeaderDTO>(order);
+                        orderDto.OrderDetails = _mapper.Map<List<OrderDetailDTO>>(sellerDetails);
+                        
+                        // Recalculate total for this seller
+                        orderDto.OrderTotal = sellerDetails.Sum(d => d.Price);
+                        
+                        filteredOrders.Add(orderDto);
+                    }
+                }
+
+                _response.Result = filteredOrders;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
         }
+
+
 
         [HttpGet("GetOrderHistory")]
         [Authorize(Roles = SD.RoleCustomer)]
