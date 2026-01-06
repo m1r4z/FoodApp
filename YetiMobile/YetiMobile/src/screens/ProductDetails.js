@@ -1,89 +1,86 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  Alert,
-  TextInput,
-} from "react-native";
-import React, { useState, useEffect, useContext } from "react";
-import {
-  StarIcon,
-  BackspaceIcon,
-  PlusIcon,
-  ShoppingCartIcon,
-} from "react-native-heroicons/solid";
-import {
-  ClockIcon,
-  PlusCircleIcon,
-  MinusCircleIcon,
-} from "react-native-heroicons/outline";
 import { useNavigation } from "@react-navigation/native";
-import MoreItems from "../components/MoreItems";
-import { cart } from "../../Database/CartItems";
-import { BaseUrl } from "../../Database/BaseUrl";
 import axios from "axios";
+import { useContext, useEffect, useState } from "react";
+import {
+    Alert,
+    FlatList,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import {
+    ClockIcon,
+    MapPinIcon,
+} from "react-native-heroicons/outline";
+import {
+    ChevronLeftIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+    ShoppingCartIcon,
+    StarIcon,
+} from "react-native-heroicons/solid";
+import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
-import BottomNav from "../../navigation/BottomNav";
 
 const ProductDetails = ({ route }) => {
   const navigation = useNavigation();
-  const { id } = route.params || {};
+  const { id, name, address } = route.params || {}; // Assuming these might come from route params now
   const [foodItems, setFoodItems] = useState([]);
   const [filteredFoodItems, setFilteredFoodItems] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { authData } = useContext(AuthContext);
 
   useEffect(() => {
     if (id) {
       const fetchFoodItems = async () => {
         try {
+          setIsLoading(true);
           const response = await axios.get(
             `${BaseUrl}FoodItem/GetAllFoodItem?id=${id}`
           );
-          console.log("Response data:", response.data);
-
           if (response.data.isSuccess) {
             setFoodItems(response.data.result);
             setFilteredFoodItems(response.data.result);
             setFetchError(null);
           } else {
-            setFetchError(
-              "Error fetching food items: " + response.data.errorMessage
-            );
+            setFetchError(response.data.errorMessage);
           }
         } catch (error) {
-          setFetchError("Error fetching food items: " + error.message);
+          setFetchError(error.message);
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchFoodItems();
     }
   }, [id]);
 
-  const addTocart = async (id) => {
-    const cart = {
-      FoodItemId: id,
+  const addTocart = async (foodId) => {
+    const cartItem = {
+      FoodItemId: foodId,
       Count: 1,
     };
-    console.log(cart);
-    console.log(authData.token);
 
     try {
-      const response = await axios.post(`${BaseUrl}ShoppingCart`, cart, {
+      const response = await axios.post(`${BaseUrl}ShoppingCart`, cartItem, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      console.log(response.data);
-      if (response.data.isSuccess === true) {
-        Alert.alert("Success", "Food added to cart.");
+      if (response.data.isSuccess) {
+        Alert.alert("Success", "Added to your cart!");
       } else {
-        Alert.alert("Error", "Something went wrong. Try Again!!!");
+        Alert.alert("Error", "Failed to add to cart.");
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
+      Alert.alert("Error", "Something went wrong.");
     }
   };
 
@@ -95,84 +92,121 @@ const ProductDetails = ({ route }) => {
   };
 
   return (
-    <View className="flex-1 absolute w-full h-full">
-      <View className="mt-10 mb-2">
-        <TextInput
-          placeholder="Search"
-          className="w-11/12 mx-auto bg-yellow-200 rounded-xl py-2 px-2 h-12 text-slate-800"
-          onChangeText={searchFoodItems}
-          placeholderTextColor={"#555"}
-        />
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
+      <View className="px-4 pt-2 pb-4">
+        <View className="flex-row items-center justify-between">
+          <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            className="p-2 bg-gray-100 rounded-full"
+          >
+            <ChevronLeftIcon size={24} color="#374151" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-gray-800 flex-1 ml-4" numberOfLines={1}>
+            {name || "Restaurant Details"}
+          </Text>
+        </View>
+
+        {/* Restaurant Info Summary */}
+        <View className="mt-4 flex-row items-center">
+            <View className="flex-row items-center mr-4">
+                <StarIcon size={18} color="#FBBF24" />
+                <Text className="ml-1 font-semibold text-gray-700">4.5</Text>
+            </View>
+            <View className="flex-row items-center mr-4">
+                <ClockIcon size={18} color="#9CA3AF" />
+                <Text className="ml-1 text-gray-500">25-30 min</Text>
+            </View>
+            <View className="flex-row items-center flex-1">
+                <MapPinIcon size={18} color="#9CA3AF" />
+                <Text className="ml-1 text-gray-500" numberOfLines={1}>{address || "Local"}</Text>
+            </View>
+        </View>
+
+        {/* Search Bar */}
+        <View className="mt-6 flex-row items-center bg-gray-100 rounded-2xl px-4 h-12">
+          <MagnifyingGlassIcon size={20} color="#9CA3AF" />
+          <TextInput
+            placeholder="Search food items..."
+            className="flex-1 ml-2 text-gray-800 text-base"
+            placeholderTextColor="#9CA3AF"
+            onChangeText={searchFoodItems}
+          />
+        </View>
       </View>
 
       {fetchError ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ color: "red" }}>{fetchError}</Text>
+        <View className="flex-1 justify-center items-center px-4">
+          <Text className="text-red-500 text-center text-lg">{fetchError}</Text>
         </View>
+      ) : isLoading ? (
+          <View className="flex-1 justify-center items-center">
+              <Text className="text-gray-400">Loading menu...</Text>
+          </View>
       ) : (
         <FlatList
-          className=""
           data={filteredFoodItems}
           keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
           renderItem={({ item }) => (
             <RenderAllFoodItem item={item} addTocart={addTocart} />
           )}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View className="mt-20 items-center">
+                <Text className="text-gray-400 text-lg font-medium">No items found</Text>
+            </View>
+          }
         />
       )}
 
+      {/* Floating Cart Button */}
       <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("Cart");
-        }}
-        style={{
-          bottom: 0,
-          right: 0,
-          position: "fixed",
-          marginLeft: 10,
-          width: "10%",
-        }}
-        className="bg-blue-200 rounded-full items-center p-2"
+        onPress={() => navigation.navigate("Cart")}
+        activeOpacity={0.8}
+        className="absolute bottom-8 right-6 bg-orange-500 rounded-full w-14 h-14 items-center justify-center shadow-lg shadow-orange-300"
       >
-        <ShoppingCartIcon size={30} color={"green"} />
+        <ShoppingCartIcon size={28} color="white" />
+        <View className="absolute -top-1 -right-1 bg-white rounded-full w-5 h-5 items-center justify-center border border-orange-500">
+            <Text className="text-[10px] font-bold text-orange-500">!</Text>
+        </View>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const RenderAllFoodItem = ({ item, addTocart }) => {
   return (
-    <View className="flex-row items-center bg-blue-200 rounded-3xl w-11/12 mx-auto">
+    <View className="flex-row items-center bg-white rounded-3xl mb-4 p-3 shadow-sm border border-gray-100">
       <View className="mr-4">
         <Image
-          className="rounded-3xl"
-          source={{ uri: item.imageUrl }} // Assuming you have an 'image' property in the seller profile
-          style={{ height: 120, width: 130 }}
+          className="rounded-2xl"
+          source={{ uri: item.imageUrl }}
+          style={{ height: 100, width: 100 }}
+          resizeMode="cover"
         />
       </View>
-      <View className="gap-y-2">
+      <View className="flex-1 justify-between h-24 py-1">
         <View>
-          <Text className="text-xl font-bold">{item.foodName}</Text>
+          <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>{item.foodName}</Text>
+          <Text className="text-gray-500 text-xs mt-1" numberOfLines={2}>Deliciously prepared with fresh ingredients.</Text>
         </View>
-        <View className="flex-row justify-between w-56 items-center ">
-          <View>
-            <Text>Rs. {item.foodPrice}</Text>
-          </View>
-          <View>
-            <TouchableOpacity
-              className="p-2 bg-red-300 rounded-xl"
-              onPress={() => {
-                addTocart(item.id);
-              }}
-            >
-              <Text>Add To Cart</Text>
-            </TouchableOpacity>
-          </View>
+        <View className="flex-row justify-between items-center">
+          <Text className="text-orange-600 font-extrabold text-lg">Rs. {item.foodPrice}</Text>
+          <TouchableOpacity
+            className="bg-orange-500 p-2 rounded-xl flex-row items-center px-3"
+            onPress={() => addTocart(item.id)}
+            activeOpacity={0.7}
+          >
+            <PlusIcon size={16} color="white" />
+            <Text className="text-white font-bold ml-1 text-xs">Add</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 };
+
 export default ProductDetails;

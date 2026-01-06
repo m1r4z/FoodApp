@@ -8,7 +8,11 @@ const RenderAllProducts = ({ item, index }) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate("ProductDetails", { id: item.sellerProfileId })}
+      onPress={() => navigation.navigate("ProductDetails", { 
+        id: item.sellerProfileId,
+        name: item.sellerProfile?.name,
+        address: item.sellerProfile?.address
+      })}
       className="ml-3 mr-3 "
       style={{ height: 230, width: 180 }}
     >

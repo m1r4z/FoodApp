@@ -23,7 +23,11 @@ const RenderAllProducts = ({ item }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
-      onPress={() => navigation.navigate("ProductDetails", { id: item.id })}
+      onPress={() => navigation.navigate("ProductDetails", { 
+        id: item.id,
+        name: item.name,
+        address: item.address
+      })}
       className="bg-white rounded-2xl mx-4 my-2 shadow-sm border border-gray-100 overflow-hidden"
     >
       <View className="flex-row">
