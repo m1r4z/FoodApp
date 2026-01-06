@@ -1,6 +1,5 @@
-import React from 'react'
-import MapView from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
+import MapView from 'react-native-maps';
 
 const Maps = () => {
   return (
@@ -19,6 +18,7 @@ const Maps = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 80,
   },
   map: {
     width: '100%',

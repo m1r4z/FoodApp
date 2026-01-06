@@ -1,24 +1,65 @@
-import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../src/screens/HomeScreen";
-import Cart from "../src/screens/Cart";
+import { Platform, View } from "react-native";
+import {
+    HomeIcon,
+    MapIcon,
+    ShoppingBagIcon,
+    UserIcon,
+} from "react-native-heroicons/outline";
+import {
+    HomeIcon as HomeIconSolid,
+    MapIcon as MapIconSolid,
+    ShoppingBagIcon as ShoppingBagIconSolid,
+    UserIcon as UserIconSolid,
+} from "react-native-heroicons/solid";
 import Account from "../src/screens/Account";
+import Cart from "../src/screens/Cart";
+import HomeScreen from "../src/screens/HomeScreen";
 import Maps from "../src/screens/Maps";
-import { Ionicons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ProductDetails from "../src/screens/ProductDetails";
 
 const Tab = createBottomTabNavigator();
 
 const BottomNav = () => {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "#f97316",
+        tabBarInactiveTintColor: "#9ca3af",
+        tabBarStyle: {
+          position: "absolute",
+          bottom: Platform.OS === "ios" ? 25 : 15,
+          left: 15,
+          right: 15,
+          backgroundColor: "white",
+          borderRadius: 30,
+          height: 70,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          elevation: 5,
+          borderTopWidth: 0,
+          paddingBottom: 0, // Reset default padding
+        },
+      }}
+    >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View className="items-center">
+              {focused ? (
+                <HomeIconSolid size={26} color={color} />
+              ) : (
+                <HomeIcon size={26} color={color} />
+              )}
+              {focused && (
+                <View className="h-1 w-1 bg-orange-500 rounded-full mt-1" />
+              )}
+            </View>
           ),
         }}
       />
@@ -26,12 +67,17 @@ const BottomNav = () => {
         name="Maps"
         component={Maps}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="google-maps"
-              size={size}
-              color={color}
-            />
+          tabBarIcon: ({ color, focused }) => (
+            <View className="items-center">
+              {focused ? (
+                <MapIconSolid size={26} color={color} />
+              ) : (
+                <MapIcon size={26} color={color} />
+              )}
+              {focused && (
+                <View className="h-1 w-1 bg-orange-500 rounded-full mt-1" />
+              )}
+            </View>
           ),
         }}
       />
@@ -39,12 +85,17 @@ const BottomNav = () => {
         name="Cart"
         component={Cart}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="cart-arrow-down"
-              size={size}
-              color={color}
-            />
+          tabBarIcon: ({ color, focused }) => (
+            <View className="items-center">
+              {focused ? (
+                <ShoppingBagIconSolid size={26} color={color} />
+              ) : (
+                <ShoppingBagIcon size={26} color={color} />
+              )}
+              {focused && (
+                <View className="h-1 w-1 bg-orange-500 rounded-full mt-1" />
+              )}
+            </View>
           ),
         }}
       />
@@ -52,8 +103,17 @@ const BottomNav = () => {
         name="Account"
         component={Account}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View className="items-center">
+              {focused ? (
+                <UserIconSolid size={26} color={color} />
+              ) : (
+                <UserIcon size={26} color={color} />
+              )}
+              {focused && (
+                <View className="h-1 w-1 bg-orange-500 rounded-full mt-1" />
+              )}
+            </View>
           ),
         }}
       />

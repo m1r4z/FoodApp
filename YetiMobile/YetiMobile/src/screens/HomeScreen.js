@@ -23,7 +23,7 @@ const HomeScreen = () => {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="pb-8">
+        <View className="pb-32">
           <HomeHeader />
           
           <Carousel />
