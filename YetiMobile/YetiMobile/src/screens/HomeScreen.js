@@ -1,5 +1,6 @@
 import { useContext } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import Carousel from "../components/Carousel";
 import HomeHeader from "../components/HomeHeader";
 import HouseholdProducts from "../components/HouseholdProducts";
 import ListOfRestaurant from "../components/ListOfRestaurant";
@@ -9,24 +10,35 @@ import { AuthContext } from "../context/AuthContext";
 const HomeScreen = () => {
   const { authData } = useContext(AuthContext);
 
+  const SectionHeader = ({ title, onSeeAll }) => (
+    <View className="flex-row justify-between items-center px-4 mt-6 mb-3">
+      <Text className="font-bold text-xl text-gray-800">{title}</Text>
+      <TouchableOpacity onPress={onSeeAll}>
+        <Text className="text-orange-500 font-semibold text-sm">See All</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <ScrollView>
-      <View className="mt-12">
-        <HomeHeader />
-        <Text className="ml-4 font-semibold text-xl mt-3 mb-2">
-          Most Popular
-        </Text>
-        <PopularItems />
-        <Text className="ml-4 font-semibold text-xl mt-3 mb-2">
-          Household Products
-        </Text>
-        <HouseholdProducts />
-        <Text className="ml-4 font-semibold text-xl mt-3 mb-2">
-          List of Restaurants
-        </Text>
-        <ListOfRestaurant />
-      </View>
-    </ScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View className="pb-8">
+          <HomeHeader />
+          
+          <Carousel />
+
+          <SectionHeader title="Categories" onSeeAll={() => {}} />
+          <PopularItems />
+
+          <SectionHeader title="Household Essentials" onSeeAll={() => {}} />
+          <HouseholdProducts />
+
+          <SectionHeader title="Top Restaurants" onSeeAll={() => {}} />
+          <ListOfRestaurant />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

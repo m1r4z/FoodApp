@@ -2,45 +2,56 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { ClockIcon, MagnifyingGlassIcon, StarIcon } from "react-native-heroicons/solid";
 import { BaseUrl } from "../../Database/BaseUrl";
 
 const RenderAllProducts = ({ item }) => {
   const navigation = useNavigation();
 
-  // Check if the item has a valid id property
   if (!item || !item.id) {
     return null;
   }
 
   return (
     <TouchableOpacity
+      activeOpacity={0.9}
       onPress={() => navigation.navigate("ProductDetails", { id: item.id })}
-      style={{
-        marginLeft: 3,
-        marginRight: 3,
-        backgroundColor: "#c3c3c3",
-        borderRadius: 10,
-        padding: 10,
-      }}
+      className="bg-white rounded-2xl mx-4 my-2 shadow-sm border border-gray-100 overflow-hidden"
     >
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View>
-          <Image
-            source={require("../../assets/images/5.jpg")}
-            style={{ height: 120, width: 130, borderRadius: 10 }}
-          />
-        </View>
-        <View style={{ marginLeft: 10 }}>
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.name}</Text>
-          <Text>Address: {item.address}</Text>
+      <View className="flex-row">
+        <Image
+          source={require("../../assets/images/5.jpg")}
+          className="h-28 w-28 rounded-l-2xl"
+          resizeMode="cover"
+        />
+        <View className="flex-1 p-3 justify-between">
+          <View>
+            <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
+              {item.name}
+            </Text>
+            <Text className="text-gray-500 text-xs mt-1" numberOfLines={1}>
+              {item.address}
+            </Text>
+          </View>
+          
+          <View className="flex-row items-center justify-between mt-2">
+            <View className="flex-row items-center bg-green-50 px-2 py-1 rounded-lg">
+              <StarIcon size={14} color="#10B981" />
+              <Text className="text-green-700 text-xs font-bold ml-1">4.5</Text>
+            </View>
+            <View className="flex-row items-center">
+              <ClockIcon size={14} color="#6B7280" />
+              <Text className="text-gray-500 text-xs ml-1">25-30 min</Text>
+            </View>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -59,15 +70,12 @@ const ListOfRestaurant = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(`${BaseUrl}SellerProfile`);
-        console.log("Response data:", response.data);
         if (response.data.isSuccess) {
           setSellerProfiles(response.data.result);
           setFilteredSellerProfiles(response.data.result);
           setFetchError(null);
         } else {
-          setFetchError(
-            "Error fetching seller profiles: " + response.data.errorMessage
-          );
+          setFetchError("Error fetching seller profiles: " + response.data.errorMessage);
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -91,45 +99,36 @@ const ListOfRestaurant = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
+      <View className="px-4 py-2">
+        <View className="flex-row items-center bg-gray-100 rounded-xl px-3 h-12">
+          <MagnifyingGlassIcon size={20} color="#6B7280" />
+          <TextInput
+            placeholder="Search for restaurants..."
+            className="flex-1 ml-2 text-gray-800 text-base"
+            placeholderTextColor="#9CA3AF"
+            value={searchText}
+            onChangeText={searchSellerProfiles}
+          />
+        </View>
+      </View>
+
       {isLoading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={{ marginTop: 16 }}>Loading...</Text>
+        <View className="flex-1 justify-center items-center py-10">
+          <ActivityIndicator size="large" color="#FF6347" />
+          <Text className="text-gray-500 mt-4">Finding local flavors...</Text>
         </View>
       ) : fetchError ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ color: "red" }}>{fetchError}</Text>
+        <View className="flex-1 justify-center items-center py-10 px-4">
+          <Text className="text-red-500 text-center">{fetchError}</Text>
         </View>
       ) : (
-        <View style={{ flex: 1 }}>
-          <View style={{ marginTop: 10, marginBottom: 10 }}>
-            <TextInput
-              placeholder="Search"
-              style={{
-                width: "90%",
-                marginLeft: "5%",
-                backgroundColor: "#fcd34d",
-                borderRadius: 20,
-                paddingLeft: 15,
-                height: 40,
-                fontSize: 16,
-                color: "#333",
-              }}
-              placeholderTextColor="#555"
-              value={searchText}
-              onChangeText={searchSellerProfiles}
-            />
-          </View>
+        <View className="flex-1">
           <FlatList
             data={filteredSellerProfiles}
             renderItem={({ item }) => <RenderAllProducts item={item} />}
             keyExtractor={(item) => item.id.toString()}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            scrollEnabled={false}
           />
         </View>
       )}

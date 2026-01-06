@@ -1,21 +1,29 @@
-import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
-import {MagnifyingGlassIcon} from 'react-native-heroicons/outline'
+import { Text, TouchableOpacity, View } from 'react-native'
+import { BellIcon, MagnifyingGlassIcon, MapPinIcon } from 'react-native-heroicons/outline'
 
 const HomeHeader = () => {
   return (
-    <View className='bg-gray-200 w-96 rounded-3xl ml-4 h-14 flex-row'>
-    {/*This is for the location section*/}
-    <View className='pl-4 pt-1 flex gap-1'>
-    <Text className='font-thin text-base'>Your Location</Text>
-    <Text className='font-light text-blue-600'>MC47+RP8, Belbari 56600, Nepal</Text>
-    </View>
-    {/*This is for the search section*/}
-    <View className='ml-20 mt-4'>
-    <TouchableOpacity>
-    <MagnifyingGlassIcon size={33}/>
-    </TouchableOpacity>
-    </View>
+    <View className="flex-row items-center justify-between px-4 py-2">
+      {/* Location Section */}
+      <View className="flex-1">
+        <View className="flex-row items-center">
+          <MapPinIcon size={18} color="#FF6347" />
+          <Text className="text-gray-500 text-xs font-medium ml-1">Your Location</Text>
+        </View>
+        <Text className="text-black font-bold text-sm" numberOfLines={1}>
+          MC47+RP8, Belbari 56600, Nepal
+        </Text>
+      </View>
+
+      {/* Action Icons */}
+      <View className="flex-row items-center space-x-3">
+        <TouchableOpacity className="p-2 bg-gray-100 rounded-full">
+          <MagnifyingGlassIcon size={24} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity className="p-2 bg-gray-100 rounded-full">
+          <BellIcon size={24} color="black" />
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
