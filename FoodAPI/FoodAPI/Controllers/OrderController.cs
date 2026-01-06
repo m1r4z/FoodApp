@@ -181,7 +181,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
 
                 if (orderHeader == null)
                 {
@@ -239,7 +239,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusPicked && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                    u.OrderStatus == SD.OrderStatusPicked && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
 
                 if (orderHeader == null)
                 {
@@ -268,7 +268,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusShipped && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                    u.OrderStatus == SD.OrderStatusShipped && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
 
                 if (orderHeader == null)
                 {
@@ -380,7 +380,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.ApplicationUserId == userId, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.ApplicationUserId == userId, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
                 
                 // Optional: Order by date descending if not done in repository
                  orderHeaders = orderHeaders.OrderByDescending(u => u.OrderDate).ToList();

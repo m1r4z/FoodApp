@@ -20,7 +20,12 @@ namespace FoodAPI
             CreateMap<ShoppingCart, ShoppingCartAddDTO>().ReverseMap();
             CreateMap<OrderHeader, OrderHeaderCreateDTO>().ReverseMap();
             CreateMap<OrderDetail, OrderDetailDTO>().ReverseMap();
-            CreateMap<OrderHeader, OrderHeaderDTO>().ReverseMap();
+            CreateMap<OrderHeader, OrderHeaderDTO>()
+                .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => 
+                    src.OrderDetails.Any() && src.OrderDetails.First().FoodItem != null && src.OrderDetails.First().FoodItem.SellerProfile != null
+                    ? src.OrderDetails.First().FoodItem.SellerProfile.Name 
+                    : "Yeti Food"))
+                .ReverseMap();
         }
     }
 }

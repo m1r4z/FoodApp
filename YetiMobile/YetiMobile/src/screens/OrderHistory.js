@@ -90,7 +90,10 @@ const OrderHistory = () => {
           <Text className="text-lg font-bold text-gray-800">
             Rs. {item.orderTotal}
           </Text>
-          <Text className="text-gray-500 text-xs mt-1">
+          <Text className="text-gray-500 text-xs mt-1 font-bold">
+             {item.restaurantName || 'Yeti Food'}
+          </Text>
+          <Text className="text-gray-400 text-xs">
              {item.applicationUser?.fullName || 'User'}
           </Text>
         </View>

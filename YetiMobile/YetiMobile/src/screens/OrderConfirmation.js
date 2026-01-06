@@ -7,6 +7,7 @@ import {
     CalendarDaysIcon,
     ChevronLeftIcon // Added for Back Button
     ,
+
     ClipboardDocumentCheckIcon,
     MapPinIcon,
     TruckIcon
@@ -111,6 +112,7 @@ const OrderConfirmation = ({ route }) => {
             <View>
                 <Text className="text-orange-100 text-sm font-medium mb-1">Order Total</Text>
                 <Text className="text-white text-3xl font-bold">Rs. {item.orderTotal}</Text>
+                 <Text className="text-white text-sm font-medium mt-1">from {item.restaurantName || "Yeti Food"}</Text>
             </View>
             <View className="bg-white/20 p-3 rounded-xl ml-4">
                  <Text className="text-white font-bold text-lg">#{item.id}</Text>

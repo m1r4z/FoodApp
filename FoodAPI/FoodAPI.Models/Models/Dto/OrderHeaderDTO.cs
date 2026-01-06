@@ -25,6 +25,7 @@ namespace FoodAPI.Models.Models.Dto
 
         public string? FullName { get; set; }
         public string? Address { get; set; }
+        public string? RestaurantName { get; set; }
         public List<OrderDetailDTO> OrderDetails { get; set; }
     }
 }

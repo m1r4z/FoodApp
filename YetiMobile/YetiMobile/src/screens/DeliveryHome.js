@@ -171,7 +171,7 @@ const RenderAllorder = ({ item, handleDeliveryPress, status }) => {
           <View className="flex-row items-start space-x-1">
             <MapPinIcon size={16} color="#6b7280" style={{marginTop: 3}} />
             <Text className="text-gray-800 font-bold text-base flex-1" numberOfLines={2}>
-              {item.address}
+              {item.restaurantName || "Yeti Food"} - {item.address}
             </Text>
           </View>
 
