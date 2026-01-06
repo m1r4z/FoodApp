@@ -241,5 +241,29 @@ namespace FoodAPI.Controllers
             _response.IsSuccess = true;
             return Ok(_response);
         }
+
+        [HttpGet("GetOrderHistory")]
+        [Authorize(Roles = SD.RoleCustomer)]
+        public async Task<ActionResult<APIResponse>> GetOrderHistory()
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.ApplicationUserId == userId);
+                
+                // Optional: Order by date descending if not done in repository
+                 orderHeaders = orderHeaders.OrderByDescending(u => u.OrderDate).ToList();
+
+                _response.Result = _mapper.Map<List<OrderHeaderDTO>>(orderHeaders);
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
     }
 }

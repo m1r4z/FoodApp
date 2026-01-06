@@ -96,7 +96,7 @@ const Account = () => {
             <MenuItem 
               icon={ClockIcon} 
               title="Order History" 
-              onPress={() => {}} 
+              onPress={() => navigation.navigate('OrderHistory')} 
             />
             <MenuItem 
               icon={MapPinIcon} 

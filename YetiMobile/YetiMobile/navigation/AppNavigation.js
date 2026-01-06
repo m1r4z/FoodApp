@@ -1,22 +1,22 @@
-import React from "react";
 
 // import 'react-native-gesture-handler';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import SignUp from "../src/screens/SignUp";
-import SignupHelp from "../src/screens/SignupHelp";
-import LogIn from "../src/screens/LogIn";
-import BuyerSignUp from "../src/screens/BuyerSignUp";
-import IndividualSignUp from "../src/screens/IndividualSignUp";
 import BusinessSignUp from "../src/screens/BusinessSignUp";
-import DeliveryRiderSighup from "../src/screens/DeliveryRiderSighup";
-import Route from "./Route";
-import ProductDetails from "../src/screens/ProductDetails";
-import Profile from "../src/screens/Profile";
+import BuyerSignUp from "../src/screens/BuyerSignUp";
 import Cart from "../src/screens/Cart";
 import DeliveryHome from "../src/screens/DeliveryHome";
+import DeliveryRiderSighup from "../src/screens/DeliveryRiderSighup";
+import IndividualSignUp from "../src/screens/IndividualSignUp";
+import LogIn from "../src/screens/LogIn";
 import OrderConfirmation from "../src/screens/OrderConfirmation";
+import OrderHistory from "../src/screens/OrderHistory";
+import ProductDetails from "../src/screens/ProductDetails";
+import Profile from "../src/screens/Profile";
+import SignUp from "../src/screens/SignUp";
+import SignupHelp from "../src/screens/SignupHelp";
+import Route from "./Route";
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +43,7 @@ const AppNavigation = () => {
         <Stack.Screen name="LogIn" component={LogIn} />
         <Stack.Screen name="DeliveryHome" component={DeliveryHome} />
         <Stack.Screen name="OrderConfirmation" component={OrderConfirmation} />
+        <Stack.Screen name="OrderHistory" component={OrderHistory} />
       </Stack.Navigator>
     </NavigationContainer>
   );
