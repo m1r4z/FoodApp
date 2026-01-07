@@ -228,6 +228,11 @@ namespace FoodAPI.Controllers
                     return Ok(_response);
                 }
 
+                // Get the current rider's ID from JWT token
+                var riderId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+                // Assign the rider to the order
+                orderHeader.DeliveryRiderId = riderId;
                 orderHeader.OrderStatus = SD.OrderStatusAccepted;
                 await _dbOrderHeader.UpdateAsync(orderHeader);
 

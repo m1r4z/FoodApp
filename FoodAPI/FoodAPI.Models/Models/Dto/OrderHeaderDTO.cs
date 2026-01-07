@@ -9,6 +9,9 @@ namespace FoodAPI.Models.Models.Dto
         public string ApplicationUserId { get; set; }
         public ApplicationUser? ApplicationUser { get; set; }
 
+        public string? DeliveryRiderId { get; set; }
+        public ApplicationUser? DeliveryRider { get; set; }
+
         public DateTime OrderDate { get; set; }
         public DateTime? ShippingDate { get; set; }
         public double? OrderTotal { get; set; }
