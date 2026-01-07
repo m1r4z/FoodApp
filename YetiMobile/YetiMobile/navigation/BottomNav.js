@@ -2,20 +2,20 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Platform, View } from "react-native";
 import {
     HomeIcon,
-    MapIcon,
     ShoppingBagIcon,
     UserIcon,
+    ClockIcon,
 } from "react-native-heroicons/outline";
 import {
     HomeIcon as HomeIconSolid,
-    MapIcon as MapIconSolid,
     ShoppingBagIcon as ShoppingBagIconSolid,
     UserIcon as UserIconSolid,
+    ClockIcon as ClockIconSolid,
 } from "react-native-heroicons/solid";
 import Account from "../src/screens/Account";
 import Cart from "../src/screens/Cart";
 import HomeScreen from "../src/screens/HomeScreen";
-import Maps from "../src/screens/Maps";
+import OrderHistory from "../src/screens/OrderHistory";
 
 const Tab = createBottomTabNavigator();
 
@@ -64,15 +64,15 @@ const BottomNav = () => {
         }}
       />
       <Tab.Screen
-        name="Maps"
-        component={Maps}
+        name="OrderHistory"
+        component={OrderHistory}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <View className="items-center">
               {focused ? (
-                <MapIconSolid size={26} color={color} />
+                <ClockIconSolid size={26} color={color} />
               ) : (
-                <MapIcon size={26} color={color} />
+                <ClockIcon size={26} color={color} />
               )}
               {focused && (
                 <View className="h-1 w-1 bg-orange-500 rounded-full mt-1" />

@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ArrowLeftIcon } from "react-native-heroicons/outline";
 import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
 
@@ -109,16 +108,11 @@ const OrderHistory = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" />
-      
+
       {/* Header */}
-      <View className="flex-row items-center p-4 bg-white shadow-sm mb-2">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="p-2 rounded-full bg-gray-100 mr-4"
-        >
-          <ArrowLeftIcon size={20} color="black" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-800">Order History</Text>
+      <View className="px-4 py-4 mt-2 bg-white">
+        <Text className="text-2xl font-bold text-gray-800">Order History</Text>
+        <Text className="text-gray-500 text-sm mt-1">View your past orders</Text>
       </View>
 
       {loading ? (
