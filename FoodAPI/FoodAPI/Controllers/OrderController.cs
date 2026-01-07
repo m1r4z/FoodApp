@@ -175,13 +175,13 @@ namespace FoodAPI.Controllers
         }
 
         [HttpGet("GetPendingOrder")]
-        //[Authorize(Roles = SD.RoleDeliveryRider)]
+        [Authorize(Roles = SD.RoleDeliveryRider)]
         public async Task<ActionResult<APIResponse>> GetPendingOrder()
         {
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
+                    u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile,OrderDetails.FoodItem.SellerProfile.ApplicationUser,ApplicationUser");
 
                 if (orderHeader == null)
                 {
@@ -195,6 +195,46 @@ namespace FoodAPI.Controllers
                 _response.IsSuccess = true;
                 return Ok(_response);
 
+            }
+            catch (Exception e)
+            {
+                _response.ErrorMessage = new List<string?>() { e.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpGet("AcceptOrder")]
+        [Authorize(Roles = SD.RoleDeliveryRider)]
+        public async Task<ActionResult<APIResponse>> AcceptOrder(int id)
+        {
+            try
+            {
+                var orderHeader = await _dbOrderHeader.GetAsync(u => u.Id == id);
+                if (orderHeader == null)
+                {
+                    _response.Result = "Order not found";
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    return Ok(_response);
+                }
+
+                // Check if order is still in Approved status
+                if (orderHeader.OrderStatus != SD.OrderStatusApproved)
+                {
+                    _response.Result = "Order is no longer available";
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessage = new List<string?>() { "This order has been accepted by another rider or is no longer available." };
+                    return Ok(_response);
+                }
+
+                orderHeader.OrderStatus = SD.OrderStatusAccepted;
+                await _dbOrderHeader.UpdateAsync(orderHeader);
+
+                _response.Result = "Order accepted successfully";
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
             }
             catch (Exception e)
             {
@@ -238,8 +278,9 @@ namespace FoodAPI.Controllers
         {
             try
             {
+                // Get both Accepted and Picked orders
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusPicked && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
+                    (u.OrderStatus == SD.OrderStatusPicked || u.OrderStatus == SD.OrderStatusAccepted) && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile,OrderDetails.FoodItem.SellerProfile.ApplicationUser,ApplicationUser");
 
                 if (orderHeader == null)
                 {
@@ -268,7 +309,7 @@ namespace FoodAPI.Controllers
             try
             {
                 var orderHeader = await _dbOrderHeader.GetAllAsync(u =>
-                    u.OrderStatus == SD.OrderStatusShipped && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile");
+                    u.OrderStatus == SD.OrderStatusShipped && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem,OrderDetails.FoodItem.SellerProfile,OrderDetails.FoodItem.SellerProfile.ApplicationUser,ApplicationUser");
 
                 if (orderHeader == null)
                 {

@@ -3,14 +3,13 @@ import axios from "axios";
 import { useContext, useState } from "react";
 import { Alert, SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import {
-    BanknotesIcon,
-    CalendarDaysIcon,
-    ChevronLeftIcon // Added for Back Button
-    ,
-
-    ClipboardDocumentCheckIcon,
-    MapPinIcon,
-    TruckIcon
+  BanknotesIcon,
+  CalendarDaysIcon,
+  ChevronLeftIcon,
+  ClipboardDocumentCheckIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TruckIcon
 } from "react-native-heroicons/outline";
 import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
@@ -22,7 +21,27 @@ const OrderConfirmation = ({ route }) => {
   const [loading, setLoading] = useState(false);
 
   // Helper to safely display status
-  const displayStatus = item.orderStatus === "Approved" ? "Pending" : item.orderStatus;
+  const displayStatus = item.orderStatus === "Approved"
+    ? "Pending"
+    : item.orderStatus === "Accepted"
+    ? "Accepted"
+    : item.orderStatus;
+
+  // Get pickup address from seller profile
+  const pickupAddress = item.orderDetails && item.orderDetails.length > 0
+    ? item.orderDetails[0].foodItem.sellerProfile?.address
+    : "Restaurant address";
+
+  const restaurantPhone = item.orderDetails && item.orderDetails.length > 0
+    ? item.orderDetails[0].foodItem.sellerProfile?.applicationUser?.phoneNumber ||
+      item.orderDetails[0].foodItem.sellerProfile?.applicationUser?.PhoneNumber
+    : "N/A";
+
+  const customerPhone = item.applicationUser?.phoneNumber ||
+                        item.applicationUser?.PhoneNumber ||
+                        item.ApplicationUser?.phoneNumber ||
+                        item.ApplicationUser?.PhoneNumber ||
+                        "N/A";
 
   const handlePickOrder = async () => {
     setLoading(true);
@@ -100,41 +119,77 @@ const OrderConfirmation = ({ route }) => {
             <ChevronLeftIcon size={24} color="#1f2937" />
         </TouchableOpacity>
         <View>
-             <Text className="text-xl font-bold text-gray-800">Delivery Details</Text>
-             <Text className="text-gray-500 text-xs text-orange-500 font-medium">{displayStatus}</Text>
+             <Text className="text-xl font-bold text-gray-800">Order Details</Text>
+             <Text className="text-xs text-orange-500 font-medium">Order ID: #{item.id} • {displayStatus}</Text>
         </View>
       </View>
 
       <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
-        
+
         {/* Header Info Card */}
-        <View className="bg-orange-500 p-6 rounded-2xl shadow-sm mb-6 flex-row justify-between items-center">
-            <View>
-                <Text className="text-orange-100 text-sm font-medium mb-1">Order Total</Text>
-                <Text className="text-white text-3xl font-bold">Rs. {item.orderTotal}</Text>
-                 <Text className="text-white text-sm font-medium mt-1">from {item.restaurantName || "Yeti Food"}</Text>
-            </View>
-            <View className="bg-white/20 p-3 rounded-xl ml-4">
-                 <Text className="text-white font-bold text-lg">#{item.id}</Text>
-            </View>
+        <View className="bg-orange-500 p-6 rounded-2xl shadow-sm mb-6">
+            <Text className="text-orange-100 text-sm font-medium mb-1">Order Total</Text>
+            <Text className="text-white text-3xl font-bold">Rs. {item.orderTotal}</Text>
+            <Text className="text-white text-sm font-medium mt-1">from {item.restaurantName || "Yeti Food"}</Text>
         </View>
 
-        {/* Details Card */}
+        {/* Restaurant Information */}
         <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-          <DetailRow 
-            icon={CalendarDaysIcon} 
-            label="Order Date" 
-            value={new Date(item.orderDate).toLocaleString()} 
+          <Text className="text-gray-800 font-bold text-lg mb-4">Restaurant Information</Text>
+          <DetailRow
+            icon={MapPinIcon}
+            label="Restaurant Name"
+            value={item.restaurantName || "Yeti Food"}
           />
-          <DetailRow 
-            icon={BanknotesIcon} 
-            label="Payment Status" 
-            value={item.paymentStatus} 
+          <DetailRow
+            icon={PhoneIcon}
+            label="Restaurant Phone"
+            value={restaurantPhone}
           />
-          <DetailRow 
-            icon={MapPinIcon} 
-            label="Delivery Address" 
-            value={item.address} 
+          <DetailRow
+            icon={MapPinIcon}
+            label="Pickup Address"
+            value={pickupAddress}
+          />
+        </View>
+
+        {/* Customer Information */}
+        <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+          <Text className="text-gray-800 font-bold text-lg mb-4">Customer Information</Text>
+          <DetailRow
+            icon={PhoneIcon}
+            label="Customer Name"
+            value={item.fullName || "N/A"}
+          />
+          <DetailRow
+            icon={PhoneIcon}
+            label="Customer Phone"
+            value={customerPhone}
+          />
+          <DetailRow
+            icon={MapPinIcon}
+            label="Drop-off Address"
+            value={item.address}
+          />
+        </View>
+
+        {/* Order Information */}
+        <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+          <Text className="text-gray-800 font-bold text-lg mb-4">Order Information</Text>
+          <DetailRow
+            icon={CalendarDaysIcon}
+            label="Order Date"
+            value={new Date(item.orderDate).toLocaleString()}
+          />
+          <DetailRow
+            icon={BanknotesIcon}
+            label="Payment Type"
+            value="Cash on Delivery"
+          />
+          <DetailRow
+            icon={BanknotesIcon}
+            label="Payment Status"
+            value={item.paymentStatus}
           />
         </View>
 
@@ -154,7 +209,22 @@ const OrderConfirmation = ({ route }) => {
 
         {/* Actions - Conditional Rendering based on activeTab/Status */}
         <View className="mt-2 mb-10">
-          {(activeTab === "Pending" || item.orderStatus === "Approved") && (
+          {/* Accepted orders - Show Pick Up Order button */}
+          {item.orderStatus === "Accepted" && (
+            <TouchableOpacity
+              className="w-full bg-orange-500 py-4 rounded-xl shadow-md flex-row justify-center items-center space-x-2"
+              onPress={handlePickOrder}
+              disabled={loading}
+            >
+              <ClipboardDocumentCheckIcon size={24} color="white" />
+              <Text className="text-white text-lg font-bold tracking-wide">
+                {loading ? "Processing..." : "Pick Up Order"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Pending/Approved orders - Show Accept button (if coming from pending list) */}
+          {item.orderStatus === "Approved" && (
             <TouchableOpacity
               className="w-full bg-orange-500 py-4 rounded-xl shadow-md flex-row justify-center items-center space-x-2"
               onPress={handlePickOrder}
@@ -167,7 +237,8 @@ const OrderConfirmation = ({ route }) => {
             </TouchableOpacity>
           )}
 
-          {(activeTab === "Picked" || item.orderStatus === "Picked") && (
+          {/* Picked orders - Show Complete Delivery button */}
+          {item.orderStatus === "Picked" && (
              <TouchableOpacity
                className="w-full bg-green-600 py-4 rounded-xl shadow-md flex-row justify-center items-center space-x-2"
                onPress={handleShippedOrder}
@@ -179,8 +250,9 @@ const OrderConfirmation = ({ route }) => {
                </Text>
              </TouchableOpacity>
            )}
-           
-           {(activeTab === "Shipped" || item.orderStatus === "Shipped") && (
+
+           {/* Shipped orders - Show completed status */}
+           {item.orderStatus === "Shipped" && (
              <View className="w-full bg-gray-100 py-4 rounded-xl flex-row justify-center items-center">
                  <TruckIcon size={24} color="#9ca3af" />
                  <Text className="text-gray-500 text-lg font-bold ml-2">Delivery Completed</Text>
