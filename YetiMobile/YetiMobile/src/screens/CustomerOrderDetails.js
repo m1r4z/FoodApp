@@ -1,19 +1,24 @@
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import {
-    BanknotesIcon,
-    CalendarDaysIcon,
-    ChevronLeftIcon,
-    MapPinIcon,
-    ShoppingBagIcon
+  BanknotesIcon,
+  CalendarDaysIcon,
+  ChevronLeftIcon,
+  MapPinIcon,
+  PhoneIcon,
+  ShoppingBagIcon,
+  UserIcon
 } from "react-native-heroicons/outline";
 
 const CustomerOrderDetails = ({ route }) => {
   const { item } = route.params;
   const navigation = useNavigation();
 
+  // Rider info is now included in the item from OrderHistory API
+  const riderInfo = item.deliveryRider || item.rider;
+
   // Helper to safely display status
-  const displayStatus = item.orderStatus === "Approved" ? "Pending" : item.orderStatus;
+  const displayStatus = item.orderStatus;
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -81,28 +86,68 @@ const CustomerOrderDetails = ({ route }) => {
                 <Text className="text-white text-sm font-medium mt-1">from {item.restaurantName || 'Yeti Food'}</Text>
             </View>
             <View className="bg-white/20 p-3 rounded-xl ml-4">
-                 <Text className="text-white font-bold text-lg">#{item.id}</Text>
+                <Text className="text-white font-bold text-lg">#{item.id}</Text>
             </View>
+        </View>
+
+        {/* Restaurant Information */}
+        <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+          <Text className="text-gray-800 font-bold text-lg mb-4">Restaurant Information</Text>
+          {item.orderDetails && item.orderDetails.length > 0 && (
+            <>
+              <DetailRow
+                icon={MapPinIcon}
+                label="Restaurant Name"
+                value={item.restaurantName || "Yeti Food"}
+              />
+              <DetailRow
+                icon={MapPinIcon}
+                label="Pickup Address"
+                value={item.orderDetails[0].foodItem.sellerProfile?.address || "N/A"}
+              />
+            </>
+          )}
         </View>
 
         {/* Details Card */}
         <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-          <DetailRow 
-            icon={CalendarDaysIcon} 
-            label="Order Date" 
-            value={new Date(item.orderDate).toLocaleString()} 
+          <Text className="text-gray-800 font-bold text-lg mb-4">Order Information</Text>
+          <DetailRow
+            icon={CalendarDaysIcon}
+            label="Order Date"
+            value={new Date(item.orderDate).toLocaleString()}
           />
-          <DetailRow 
-            icon={BanknotesIcon} 
-            label="Payment Status" 
-            value={item.paymentStatus} 
+          <DetailRow
+            icon={BanknotesIcon}
+            label="Payment Status"
+            value={item.paymentStatus}
           />
-          <DetailRow 
-            icon={MapPinIcon} 
-            label="Delivery Address" 
-            value={item.address} 
+          <DetailRow
+            icon={MapPinIcon}
+            label="Delivery Address"
+            value={item.address}
           />
         </View>
+
+        {/* Rider Information - Show only when order is accepted/picked/shipped and rider is assigned */}
+        {riderInfo && (item.orderStatus === "Accepted" || item.orderStatus === "Picked" || item.orderStatus === "Shipped") && (
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-gray-800 font-bold text-lg mb-4">Delivery Rider Information</Text>
+
+            <>
+              <DetailRow
+                icon={UserIcon}
+                label="Rider Name"
+                value={riderInfo.fullName || riderInfo.name || "N/A"}
+              />
+              <DetailRow
+                icon={PhoneIcon}
+                label="Rider Phone"
+                value={riderInfo.phoneNumber || riderInfo.PhoneNumber || "N/A"}
+              />
+            </>
+          </View>
+        )}
 
         {/* Food Items List */}
         <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
