@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Linq.Expressions;
 using AutoMapper;
 using FoodAPI.DataAccess.Repository.IRepository;
 using FoodAPI.Models.Models;
@@ -367,7 +368,7 @@ namespace FoodAPI.Controllers
 
         [HttpGet("GetAllOrder")]
         [Authorize(Roles = $"{SD.RoleRestaurantSeller}, {SD.RoleIndividualSeller}")]
-        public async Task<ActionResult<APIResponse>> GetAllOrder()
+        public async Task<ActionResult<APIResponse>> GetAllOrder([FromQuery] string? status)
         {
             try
             {
@@ -382,8 +383,15 @@ namespace FoodAPI.Controllers
                      return NotFound(_response);
                 }
 
-                // Get all approved ordered with details
-                var orderHeaders = await _dbOrderHeader.GetAllAsync(u => u.OrderStatus == SD.OrderStatusApproved && u.PaymentStatus == SD.PaymentStatusApproved, includeProperties: "OrderDetails,OrderDetails.FoodItem");
+                // Get orders based on status filter
+                Expression<Func<OrderHeader, bool>> filter = u => u.PaymentStatus == SD.PaymentStatusApproved;
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    filter = u => u.OrderStatus == status && u.PaymentStatus == SD.PaymentStatusApproved;
+                }
+
+                var orderHeaders = await _dbOrderHeader.GetAllAsync(filter, includeProperties: "OrderDetails,OrderDetails.FoodItem");
                 
                 var filteredOrders = new List<OrderHeaderDTO>();
 

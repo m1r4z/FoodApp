@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { BaseUrl } from "../../Database/BaseUrl";
 import { AuthContext } from "../context/AuthContext";
+import usePolling from "../hooks/usePolling";
 
 const OrderHistory = () => {
   const navigation = useNavigation();
@@ -21,7 +22,7 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const response = await axios.get(
         `${BaseUrl}Order/GetOrderHistory`,
@@ -40,11 +41,14 @@ const OrderHistory = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [authData.token]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  // Enable polling with 10-second interval
+  usePolling(fetchOrders, {
+    interval: 10000, // Poll every 10 seconds
+    immediate: true,
+    enabled: true,
+  });
 
   const onRefresh = () => {
     setRefreshing(true);

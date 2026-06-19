@@ -14,7 +14,11 @@ const CustomerOrderDetails = ({ route }) => {
   const { item } = route.params;
   const navigation = useNavigation();
 
-  // Rider info is now included in the item from OrderHistory API
+  // Note: The order details are passed from OrderHistory screen which already has
+  // all the necessary data including delivery rider info. The OrderHistory screen
+  // polls the API every 10 seconds, so when you navigate back, you'll see updated data.
+  // For real-time updates on this screen, consider implementing WebSocket or
+  // a dedicated API endpoint for fetching single order details.
   const riderInfo = item.deliveryRider || item.rider;
 
   // Helper to safely display status

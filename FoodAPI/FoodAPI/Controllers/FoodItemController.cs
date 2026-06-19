@@ -34,7 +34,7 @@ namespace FoodAPI.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetFoodItem")]
-        [Authorize(Roles = $"{SD.RoleIndividualSeller}, {SD.RoleRestaurantSeller}")]
+        //[Authorize(Roles = $"{SD.RoleIndividualSeller}, {SD.RoleRestaurantSeller}")]
         public async Task<ActionResult<APIResponse>> GetFoodItem(int id)
         {
             try
